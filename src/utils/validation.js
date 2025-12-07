@@ -1,7 +1,8 @@
 const validator = require("validator");
 
 const validationSignupData = (req) => {
-  const { firstName, lastName, emailId, password, address, phone ,role} = req.body;
+  const { firstName, lastName, emailId, password, address, phone, role } =
+    req.body;
   if (!firstName) {
     throw new Error("name is not valid");
   } else if (firstName.length < 2 || firstName.length > 50) {
@@ -16,13 +17,29 @@ const validationSignupData = (req) => {
     throw new Error("address should below 200 Character");
   } else if (phone && !validator.isMobilePhone(phone, "en-IN")) {
     throw new Error("phone number is not valid");
-  } else if ((role && !["user","shelter-user"].includes(role))) {
+  } else if (role && !["user", "shelter-user"].includes(role)) {
     throw new Error("Invalid Role");
   }
 };
 
+const validationLoginData = (emailId) => {
+  if (!validator.isEmail(emailId)) throw new Error("Invalid Email");
+};
 
-const  validationLoginData=(emailId)=> {
- if(!validator.isEmail(emailId)) throw new Error("Invalid Email")
-}
-module.exports = { validationSignupData, validationLoginData };
+const validationUpdateUserData = (req) => {
+  const allowedEditFields = [
+    "firstName",
+    "lastName",
+    "phone",
+    "password",
+    "address",
+    "pet_owner",
+  ];
+const isEditAllowed=Object.keys(req.body).every((field)=>allowedEditFields.includes(field));
+return isEditAllowed;
+};
+module.exports = {
+  validationSignupData,
+  validationLoginData,
+  validationUpdateUserData,
+};

@@ -4,12 +4,13 @@ const {authenticateUser}=require("../middlewares/authenticateUser_middleware")
 
 const authRoute=require("./auth_route")
 const userRoute=require("./user_route")
+const shelterRoute=require("./shelter_route")
 
 
 
 router.use("/auth",authRoute)
 router.use("/user",authenticateUser,userRoute)
-
+router.use("/shelters",authenticateUser,shelterRoute)
 
 
 module.exports=router;
