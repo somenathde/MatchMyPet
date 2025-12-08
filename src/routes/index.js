@@ -10,7 +10,7 @@ const shelterRoute=require("./shelter_route")
 
 router.use("/auth",authRoute)
 router.use("/user",authenticateUser,userRoute)
-router.use("/shelters",authenticateUser,shelterRoute)
+router.use("/shelter",authenticateUser,shelterRoute)
 
 
 module.exports=router;

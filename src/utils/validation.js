@@ -35,11 +35,38 @@ const validationUpdateUserData = (req) => {
     "address",
     "pet_owner",
   ];
-const isEditAllowed=Object.keys(req.body).every((field)=>allowedEditFields.includes(field));
-return isEditAllowed;
+  const isEditAllowed = Object.keys(req.body).every((field) =>
+    allowedEditFields.includes(field)
+  );
+  return isEditAllowed;
 };
+
+const validationShelterRegisterData = (req) => {
+  const { name, emailId, address, phone } = req.body;
+  if (!name) {
+    throw new Error("name is not valid");
+  } else if (name.length < 2 || name.length > 50) {
+    throw new Error("FistName should be 3 to 50 Character");
+  } else if (!validator.isEmail(emailId)) {
+    throw new Error("email id not valid");
+  } else if (phone && !validator.isMobilePhone(phone, "en-IN")) {
+    throw new Error("phone number is not valid");
+  } else if (!address || typeof address !== "object") {
+    throw new Error("Address is required");
+  } else if (!address.city || address.city.trim().length <=2) {
+    throw new Error("City is required and should be at least 2 characters");
+  } else if (!address.state || address.state.trim().length <=2) {
+    throw new Error("State is required and should be at least 2 characters");
+  } else if (!address.pincode || !/^[0-9]{6}$/.test(address.pincode)) {
+    throw new Error("Pincode must be 6 digits");
+  } else if (!address.fullAddress || address.fullAddress.length < 10) {
+    throw new Error("Full address should be at least 10 characters");
+  }
+};
+
 module.exports = {
   validationSignupData,
   validationLoginData,
   validationUpdateUserData,
+  validationShelterRegisterData,
 };
