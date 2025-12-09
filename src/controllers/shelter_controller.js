@@ -22,4 +22,13 @@ const registerShelter = async (req, res) => {
   }
 };
 
-module.exports = { registerShelter };
+const getPetdetails=async(req,res)=>{
+  try {
+    const availablePetForAdopt=null;
+    res.status(200).json({message:availablePetForAdopt});
+  } catch (error) {
+    res.status(400).json({ error: err.message });
+  }
+}
+
+module.exports = { registerShelter,getPetdetails };

@@ -1,13 +1,12 @@
 const express= require('express')
 const router = express.Router({ mergeParams: true })
-const {registerShelter}=require("../controllers/shelter_controller")
+const {registerShelter,getPetdetails}=require("../controllers/shelter_controller")
 
 
 router.post("/register",registerShelter)
 
-router.get("/:id/pets",(req, res) => {
-  //todo get pet details
-})
+router.get("/:id/pets",getPetdetails)
+
 router.get("/:id",(req, res) => {
   //todo 
 })

@@ -42,7 +42,7 @@ const validationUpdateUserData = (req) => {
 };
 
 const validationShelterRegisterData = (req) => {
-  const { name, emailId, address, phone } = req.body;
+  const { name, emailId, address, phone,documents } = req.body;
   if (!name) {
     throw new Error("name is not valid");
   } else if (name.length < 2 || name.length > 50) {
@@ -53,14 +53,48 @@ const validationShelterRegisterData = (req) => {
     throw new Error("phone number is not valid");
   } else if (!address || typeof address !== "object") {
     throw new Error("Address is required");
-  } else if (!address.city || address.city.trim().length <=2) {
+  } else if (!address.city || address.city.trim().length <= 2) {
     throw new Error("City is required and should be at least 2 characters");
-  } else if (!address.state || address.state.trim().length <=2) {
+  } else if (!address.state || address.state.trim().length <= 2) {
     throw new Error("State is required and should be at least 2 characters");
   } else if (!address.pincode || !/^[0-9]{6}$/.test(address.pincode)) {
     throw new Error("Pincode must be 6 digits");
   } else if (!address.fullAddress || address.fullAddress.length < 10) {
     throw new Error("Full address should be at least 10 characters");
+  } else if (documents)
+  {
+    for (const document of documents) {
+      if (!validator.isURL(document)) {
+        throw new Error(`Invalid document URL: ${document}`);
+      }
+    }
+  }
+};
+
+const validatePetAdoptRegisterData = (req) => {
+  const { name,gender,  location, breed, age, documents, adoptStatus,species } = req.body;
+  if ((name && name.length < 2) || name.length > 50) {
+    throw new Error("FistName should be 3 to 50 Character");
+  } else if (age && age.length > 50) {
+    throw new Error("Should be less than 50 char");
+  } else if (!["dog", "cat", "rabbit", "cow", "other"].includes(species)) {
+    throw new Error("This type is not allowed");
+  } else if (breed && breed.length > 20) {
+    throw new Error("Length should be below 20 char");
+  } else if (!["male", "female","Not Sure"].includes(gender)) {
+    throw new Error("This gender type is not allowed");
+  } else if (!location.city || location.city.trim().length <= 2) {
+    throw new Error("City is required and should be at least 2 characters");
+  } else if (!location.state || location.state.trim().length <= 2) {
+    throw new Error("State is required and should be at least 2 characters");
+  } else if (adoptStatus && !["Available","Adopted","Pending"].includes(adoptStatus)){
+    throw new Error("Adopt status required");
+   } else if (documents) {
+    for (const document of documents) {
+      if (!validator.isURL(document)) {
+        throw new Error(`Invalid document URL: ${document}`);
+      }
+    }
   }
 };
 
@@ -69,4 +103,5 @@ module.exports = {
   validationLoginData,
   validationUpdateUserData,
   validationShelterRegisterData,
+  validatePetAdoptRegisterData,
 };
