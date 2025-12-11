@@ -98,10 +98,36 @@ const validatePetAdoptRegisterData = (req) => {
   }
 };
 
+
+const validationlostAndFoundRegisterPetData =(req)=>{
+  const{type,petType,breed,color,lastSeenLocation,description,contactNumber}=req.body
+if(!["lost","found"].includes(type)){ throw new Error("Should be lost or found");}
+else if(!["dog", "cat", "rabbit", "other", "bird"].includes(petType)){throw new Error("Please enter correct pet type");}
+else if(breed && breed.length>25){throw new Error ("Should be below 25 char")}
+else if(!color || color.length>25){throw new Error ("Should be below 25 char")}
+else if(!lastSeenLocation.city || lastSeenLocation.city.length>25){throw new Error ("Should be below 25 char")}
+else if(!lastSeenLocation.area || lastSeenLocation.area.length>25){throw new Error ("Should be below 25 char")}
+else if(!lastSeenLocation.pincode || lastSeenLocation.pincode.length!==6){throw new Error ("Should be 6 digit")}
+else if(!description || description.length>200){throw new Error ("Should be below 200 char")}
+else if(!contactNumber ||!validator.isMobilePhone(contactNumber.trim(),"en-IN")){throw new Error ("Should be a valid mob no")}
+
+
+}
+
+const validationlostAndFoundUpdatePetData=(req)=>{
+const ALLOWED_FIELDS=["type","petType","breed","color","lastSeenLocation","description","contactNumber","images"];
+const isUpdateAllowed = Object.keys(req.body).every((field) =>
+  ALLOWED_FIELDS.includes(field))
+if(!isUpdateAllowed) throw new Error("This all fiels are not allowed");
+//todo
+}
+
 module.exports = {
   validationSignupData,
   validationLoginData,
   validationUpdateUserData,
   validationShelterRegisterData,
   validatePetAdoptRegisterData,
+  validationlostAndFoundRegisterPetData,
+  validationlostAndFoundUpdatePetData
 };

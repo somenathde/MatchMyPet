@@ -1,5 +1,6 @@
 const Shelter = require("../models/shelter_model");
 const AdoptPet = require("../models/adoptPet_model");
+const LostAndFound=require("../models/lostAndFound_model")
 
 async function authorisedUsertoModifyPetDetails(req, res, next) {
   try {
@@ -18,4 +19,18 @@ async function authorisedUsertoModifyPetDetails(req, res, next) {
   }
 }
 
-module.exports = { authorisedUsertoModifyPetDetails };
+
+async function authorisedUserToEditLostFoundPetDetail(req,res,next) {
+  try {
+    const petId=req.params.id;
+  const lostAndFoundPet=await LostAndFound.findById(petId);
+  if(!lostAndFoundPet) throw new Error("Pet Not Found");
+  if(!lostAndFoundPet.userId.equals(req.userId)) throw new Error("Not authorised")
+    next()
+  } catch (error) {
+    res.status(400).json({errror:error.message})
+  }
+  
+}
+
+module.exports = { authorisedUsertoModifyPetDetails,authorisedUserToEditLostFoundPetDetail };
