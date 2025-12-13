@@ -1,6 +1,6 @@
 const express = require("express")
 const router = express.Router({ mergeParams: true })
-const {authenticateUser}=require("../middlewares/authenticateUser_middleware")
+const {authenticateUser,authenticateAdmin}=require("../middlewares/authenticateUser_middleware")
 
 const authRoute=require("./auth_route")
 const userRoute=require("./user_route")
@@ -20,7 +20,7 @@ router.use("/lost-and-found",authenticateUser,lostAndFoundRoute)
 router.use("/grooming",authenticateUser,groomingRoute)
 router.use("/stores",authenticateUser,storesRoute)
 router.use("/orders",authenticateUser,ordersRoute)
-router.use("/admin",authenticateUser,adminRoute)
+router.use("/admin",authenticateAdmin,authenticateUser,adminRoute)
 
 
 

@@ -45,6 +45,41 @@ const handleGetAllGroomingServices = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+const handleDeleteOneGroomingServiceProvider = async (req, res) => {
+  try {
+    res.status(200).json({ message: "done" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+const handleAddGroomingServiceProvider = async (req, res) => {
+  try {
+    res.status(200).json({ message: "done" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+const handleGetOneGroomingServiceProvider = async (req, res) => {
+  try {
+    res.status(200).json({ message: "done" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+const handleGetAllGroomingServicesProvider = async (req, res) => {
+  try {
+    res.status(200).json({ message: "done" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+const handleModifyGroomingServiceProvider = async (req, res) => {
+  try {
+    res.status(200).json({ message: "done" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 module.exports = {
   handleAddGroomingService,
@@ -53,4 +88,9 @@ module.exports = {
   handleRateGroomingService,
   handleDeleteOneGroomingService,
   handleGetAllGroomingServices,
+  handleDeleteOneGroomingServiceProvider,
+    handleAddGroomingServiceProvider,
+    handleGetOneGroomingServiceProvider,
+    handleGetAllGroomingServicesProvider,
+    handleModifyGroomingServiceProvider,
 };
