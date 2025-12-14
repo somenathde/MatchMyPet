@@ -26,7 +26,7 @@ const orderSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "user",
       required: true,
       index: true,
     },
@@ -46,13 +46,14 @@ const orderSchema = new mongoose.Schema(
     },
 
     address: {
-
-      AddressLine_1: { type: String, required: true, trim: true, minlength: 10},
-      AddressLine_2: { type: String,trim: true},
+      name:{ type: String, required: true, trim: true, minlength: 2,maxlength:100},
+      AddressLine_1: { type: String, required: true, trim: true, minlength: 10,maxlength:100},
+      AddressLine_2: { type: String,trim: true,maxlength:100},
       pincode: {type: String,match: [/^[0-9]{6}$/, "Pincode must be 6 digit"]},
-      city: {type: String, required: true, trim: true},
-      state: {type: String, required: true,trim: true},
-      country: {type: String, default: "India"}
+      city: {type: String, required: true, trim: true,maxlength:100},
+      state: {type: String, required: true,trim: true,maxlength:100},
+      country: {type: String, default: "India",maxlength:100},
+      phone:{type: String,match: [/^[0-9]{10}$/, "Phone must be 10 digit"]},
     },
 
     status: {

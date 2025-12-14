@@ -1,6 +1,12 @@
 const mongoose = require("mongoose");
 const storeSchema = new mongoose.Schema(
   {
+
+    ownerId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "user",
+          required: true,
+        },
     name: {
       type: String,
       required: true,
@@ -12,7 +18,7 @@ const storeSchema = new mongoose.Schema(
       type: String,
       maxlength: 200,
     },
-    logo: { type: String },
+    logo: { type: String, maxlength: 200 },
     isActive: {
       type: Boolean,
       default: true,
@@ -20,7 +26,7 @@ const storeSchema = new mongoose.Schema(
     adminsUserId: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
+        ref: "user",
       },
     ],
     contactInfo: {
@@ -28,19 +34,20 @@ const storeSchema = new mongoose.Schema(
         type: String,
         lowercase: true,
         trim: true,
-        unique: true,
+        maxlength:100,
+        unique: true,match: [/^\S+@\S+\.\S+$/,"Please enter a valid email address"],
       },
-      phone: { type: String },
+      phone: { type: String, match: [/^[0-9]{10}$/, "Phone must be 10 digit"]},
     },
 
     address: {
-      street:{type:String}, 
-      city: {type:String},
-      state: {type:String}, 
-      pincode:{type:String}, 
+      street:{type:String,maxlength:50}, 
+      city: {type:String,maxlength:50},
+      state: {type:String,maxlength:50}, 
+      pincode:{type:String,required:true, match: [/^[0-9]{6}$/, "Pincode must be 6 digit"]}, 
       country: {
         type: String,
-        default: "India",
+        default: "India",maxlength:50
       },
     },
   },

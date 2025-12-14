@@ -52,6 +52,8 @@ const handleDeleteOneGroomingServiceProvider = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+
 const handleAddGroomingServiceProvider = async (req, res) => {
   try {
     res.status(200).json({ message: "done" });
@@ -59,6 +61,10 @@ const handleAddGroomingServiceProvider = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+
+
+
 const handleGetOneGroomingServiceProvider = async (req, res) => {
   try {
     res.status(200).json({ message: "done" });
@@ -88,7 +94,7 @@ module.exports = {
   handleRateGroomingService,
   handleDeleteOneGroomingService,
   handleGetAllGroomingServices,
-  handleDeleteOneGroomingServiceProvider,
+    handleDeleteOneGroomingServiceProvider,
     handleAddGroomingServiceProvider,
     handleGetOneGroomingServiceProvider,
     handleGetAllGroomingServicesProvider,

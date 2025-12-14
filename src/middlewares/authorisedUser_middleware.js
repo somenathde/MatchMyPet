@@ -1,6 +1,7 @@
 const Shelter = require("../models/shelter_model");
 const AdoptPet = require("../models/adoptPet_model");
 const LostAndFound=require("../models/lostAndFound_model")
+const GroomingProvider=require("../models/groomingProvider_model")
 
 async function authorisedUsertoModifyPetDetails(req, res, next) {
   try {
@@ -33,4 +34,16 @@ async function authorisedUserToEditLostFoundPetDetail(req,res,next) {
   
 }
 
-module.exports = { authorisedUsertoModifyPetDetails,authorisedUserToEditLostFoundPetDetail };
+
+async function authorizeGroomingProviderAdmin(req,res,next) {
+  try {
+    const groomingProvider=await GroomingProvider.findOne({admins: { $in: [req.userId] }})
+    if(!groomingProvider) throw new Error("User Not a Service providerAdmin")
+      req.groomingProviderId=groomingProvider._id;
+    next()
+  } catch (error) {
+    res.status(400).json({errror:error.message})
+  }
+}
+
+module.exports = { authorisedUsertoModifyPetDetails,authorisedUserToEditLostFoundPetDetail,authorizeGroomingProviderAdmin };

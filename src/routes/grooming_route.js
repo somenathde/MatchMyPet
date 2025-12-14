@@ -3,6 +3,7 @@ const router = express.Router({ mergeParams: true });
 const {
   authenticateAdmin,
 } = require("../middlewares/authenticateUser_middleware");
+const {authorizeGroomingProviderAdmin}=require("../middlewares/authorisedUser_middleware")
 const {
   handleDeleteOneGroomingService,
   handleAddGroomingService,
@@ -16,18 +17,19 @@ const {
   handleGetAllGroomingServicesProvider,
   handleModifyGroomingServiceProvider,
 } = require("../controllers/grooming_controller");
+
 router.post("/provider", handleAddGroomingServiceProvider);
-router.put("/provider:id", handleModifyGroomingServiceProvider);
+router.put("/provider:id", authorizeGroomingProviderAdmin, handleModifyGroomingServiceProvider);
 router.get("/provider:id",handleGetOneGroomingServiceProvider);
-router.get("/provider/all", authenticateAdmin, handleGetAllGroomingServicesProvider);
+router.get("/provider/all", handleGetAllGroomingServicesProvider);
 router.delete("/provider:id", authenticateAdmin, handleDeleteOneGroomingServiceProvider);
 
 
-router.post("/", authenticateAdmin, handleAddGroomingService);
-router.put("/", authenticateAdmin, handleModifyGroomingService);
-router.get("/:id",  handleGetOneGroomingService);
-router.get("/",  handleGetAllGroomingServices);
-router.delete("/:id", authenticateAdmin, handleDeleteOneGroomingService);
+router.post("/", authorizeGroomingProviderAdmin, handleAddGroomingService);
+router.put("/",authorizeGroomingProviderAdmin,handleModifyGroomingService);
+router.get("/:id", handleGetOneGroomingService);
+router.get("/", handleGetAllGroomingServices);
+router.delete("/:id", authorizeGroomingProviderAdmin, handleDeleteOneGroomingService);//owner
 router.post("/:id/give-rating", handleRateGroomingService);
 
 

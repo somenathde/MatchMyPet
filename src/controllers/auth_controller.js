@@ -59,4 +59,12 @@ async function handleLogin(req, res) {
   }
 }
 
-module.exports = { handleLogin, handleSignup };
+const handleLogout=async(req,res)=>{
+try {
+      res.cookie("token", null,{expires: new Date(Date.now())}).status(200).json({ message: "logout Successfully",token:null });
+} catch (error) {
+   res.status(500).json({ error: err.message });
+}
+}
+
+module.exports = { handleLogin, handleSignup, handleLogout };

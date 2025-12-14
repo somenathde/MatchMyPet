@@ -10,7 +10,7 @@ router.put("/:id",updateUser)
 
 router.delete("/:id",deleteUser)
 
-router.put("/:id/pets",getUserPet)
+router.get("/:id/pets",getUserPet)
 router.get("/",authenticateAdmin,getallUser)
 
 

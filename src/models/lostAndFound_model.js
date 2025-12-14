@@ -8,17 +8,17 @@ const lostAndFoundSchema = new mongoose.Schema(
       enum: ["dog", "cat", "rabbit", "other", "bird"],
       required: true,
     },
-    breed: { type: String },
-    color: { type: String, required: true },
+    breed: { type: String, maxlength:50},
+    color: { type: String, required: true, maxlength:50},
     lastSeenLocation: {
-      city: { type: String, required: true },
-      area: { type: String, required: true },
+      city: { type: String, required: true, maxlength:50 },
+      area: { type: String, required: true, maxlength:50 },
       pincode: {
         type: String,
         match: [/^[0-9]{6}$/, "Pincode must be 6 digit"],
       },
     },
-    description: { type: String, required: true },
+    description: { type: String, required: true ,maxlength:500},
     images: {
       type: [String],
       default: [],
@@ -29,7 +29,7 @@ const lostAndFoundSchema = new mongoose.Schema(
         },
       ],
     },
-    contactNumber: { type: String, required: true },
+    contactNumber: { type: String, required: true,match: [/^[0-9]{10}$/, "Phone number must be 10 digits"]},
     status: { type: String, enum: ["open", "resolved"], default: "open" },
   },
   { timestamps: true }

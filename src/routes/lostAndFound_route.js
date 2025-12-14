@@ -19,5 +19,5 @@ router.get("/lost", handlegetAllLostPet);
 router.get("/found", handlegetAllFoundPet);
 router.get("/:id", handlegetOneLostOrFoundPet);
 router.get("/", handlegetAllLostAndFoundPet);
-router.delete("/:id",authorisedUserToEditLostFoundPetDetail, handledeleteOneLostAndFoundPet);
+router.delete("/:id",authorisedUserToEditLostFoundPetDetail,handledeleteOneLostAndFoundPet);
 module.exports = router;
