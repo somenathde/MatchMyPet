@@ -70,4 +70,5 @@ const groomingServiceSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("groomingService", groomingServiceSchema);
+ const GroomingService= mongoose.model("groomingService", groomingServiceSchema);
+module.exports=GroomingService;

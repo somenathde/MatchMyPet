@@ -32,10 +32,11 @@ const groomingProviderSchema = new mongoose.Schema(
       phone: {
         type: String,
         required: true,
+         match: [/^[0-9]{10}$/, "Pincode must be 6 digits"]
       },
       email: {
         type: String,
-        lowercase: true,
+        lowercase: true,match: [/^\S+@\S+\.\S+$/,"Please enter a valid email address"],
       },
     },
 
@@ -44,11 +45,13 @@ const groomingProviderSchema = new mongoose.Schema(
         type: String,
         required: true,
         index: true,
+          maxlength: 50
       },
       state: {
         type: String,
         required: true,
         index: true,
+         maxlength: 50
       },
       pincode: {
         type: String,
@@ -60,8 +63,8 @@ const groomingProviderSchema = new mongoose.Schema(
   ref: "user",
 }],
     documents: {
-      gstNumber: {type:String,},
-      licenseNumber:{type:String},
+      gstNumber: {type:String,maxlength:15},
+      licenseNumber:{type:String, maxlength:50},
       document: {
       type: [String],
       default: [],
@@ -87,4 +90,5 @@ const groomingProviderSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("groomingProvider", groomingProviderSchema);
+const GroomingProvider = mongoose.model("groomingProvider", groomingProviderSchema);
+module.exports=GroomingProvider;

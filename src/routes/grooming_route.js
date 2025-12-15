@@ -16,13 +16,17 @@ const {
   handleGetOneGroomingServiceProvider,
   handleGetAllGroomingServicesProvider,
   handleModifyGroomingServiceProvider,
+  handleAddAdminGroomingServicesProvider,
+  handleRemoveAdminGroomingServicesProvider
 } = require("../controllers/grooming_controller");
 
 router.post("/provider", handleAddGroomingServiceProvider);
-router.put("/provider:id", authorizeGroomingProviderAdmin, handleModifyGroomingServiceProvider);
-router.get("/provider:id",handleGetOneGroomingServiceProvider);
-router.get("/provider/all", handleGetAllGroomingServicesProvider);
-router.delete("/provider:id", authenticateAdmin, handleDeleteOneGroomingServiceProvider);
+router.put("/provider/:id", authorizeGroomingProviderAdmin, handleModifyGroomingServiceProvider);
+router.get("/provider/:id",handleGetOneGroomingServiceProvider);
+router.get("/provider", handleGetAllGroomingServicesProvider);
+router.patch("/provider/:id/add-admin", authorizeGroomingProviderAdmin, handleAddAdminGroomingServicesProvider);
+router.patch("/provider/:id/remove-admin",authorizeGroomingProviderAdmin, handleRemoveAdminGroomingServicesProvider);
+router.delete("/provider/:id", authenticateAdmin, handleDeleteOneGroomingServiceProvider);
 
 
 router.post("/", authorizeGroomingProviderAdmin, handleAddGroomingService);

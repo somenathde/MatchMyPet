@@ -53,9 +53,7 @@ async function getallUser(req, res) {
 async function updateUser(req, res) {
   try {
     if (req.userId !== req.params.id) throw new Error("Unauthosised Request, You can't adit other user");
-    if (!validationUpdateUserData(req)) {
-      throw new Error("Selected field edit request not valid");
-    }
+    validationUpdateUserData(req)
     const loggedInUser = await User.findById(req.userId);
     Object.keys(req.body).forEach((key) => {
       loggedInUser[key] = req.body[key];
