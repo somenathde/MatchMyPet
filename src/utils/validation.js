@@ -173,11 +173,34 @@ const validationGroomingServiceProviderUpdateData=(req)=>{
 }
 
 const validationGroomingServiceRegisterData=(req)=>{
-
+const allowed=["serviceName", "description","pricing","images","isActive"]
+  const isAllowed = Object.keys(req.body).every((field) =>
+    allowed.includes(field)
+  );
+  if(!isAllowed) throw new Error("All this fields are not valid")
+  const{ serviceName, description,pricing,images,isActive}=req.body
+  if(!serviceName || serviceName.length>100) throw new Error("shoud be below 100 char")
+  else if(!description||description.length>1000) throw new Error("shoud be below 1000 char")
+  else if(pricing?.basePrice===undefined||pricing.basePrice<0) throw new Error("shoud be minimum 0")
+  else if(pricing?.currency&&(!["INR","USD"].includes(pricing.currency))) throw new Error("sholud be USD/INR")
+  else if(images&&(!Array.isArray(images)||images.length>10)) throw new Error("max to allowed")
+  else if(isActive&&!validator.isBoolean(isActive)) throw new Error("only boolean acepected")
 }
 
 const validationGroomingServiceUpdateData=(req)=>{
-
+const allowed=["serviceName", "description","pricing","images","isActive"]
+  const isAllowed = Object.keys(req.body).every((field) =>
+    allowed.includes(field)
+  );
+  if(!validator.isMongoId(req.params.serviceId))throw new Error("not a valid Service id")
+  if(!isAllowed) throw new Error("All this fields are not valid")
+  const{ serviceName, description,pricing,images,isActive}=req.body
+  if(!serviceName && serviceName.length>100) throw new Error("shoud be below 100 char")
+  else if(!description&&description.length>1000) throw new Error("shoud be below 1000 char")
+  else if(pricing?.basePrice!==undefined&&pricing.basePrice<0) throw new Error("shoud be minimum 0")
+  else if(pricing?.currency&&(!["INR","USD"].includes(pricing.currency))) throw new Error("sholud be USD/INR")
+  else if(images&&(!Array.isArray(images)||images.length>10)) throw new Error("max to allowed")
+  else if(isActive&&!validator.isBoolean(isActive)) throw new Error("only boolean acepected")
 }
 
 module.exports = {

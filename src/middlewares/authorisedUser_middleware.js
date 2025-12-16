@@ -37,9 +37,11 @@ async function authorisedUserToEditLostFoundPetDetail(req,res,next) {
 
 async function authorizeGroomingProviderAdmin(req,res,next) {
   try {
+    if(!req.groomingProviderId) {
     const groomingProvider=await GroomingProvider.findById(req.params.id)
     const isAdmin = groomingProvider.ownerId.equals(req.userId) || groomingProvider.admins.map(id => id.toString()).includes(req.userId)
     if(!isAdmin) throw new Error("User Not a Service providerAdmin")
+      req.groomingProviderId=groomingProvider._id}
     next()
   } catch (error) {
     res.status(400).json({errror:error.message})

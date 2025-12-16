@@ -1,11 +1,18 @@
 const {validationGroomingServiceProviderSignupData,validationGroomingServiceProviderUpdateData,validationGroomingServiceRegisterData,validationGroomingServiceUpdateData}=require("../utils/validation");
 const GroomingProvider=require("../models/groomingProvider_model")
+const GroomingService=require("../models/groomingServices_model")
+const validator=require("validator")
+
 
 const handleAddGroomingService = async (req, res) => {
   try {
     validationGroomingServiceRegisterData(req);
-
-    res.status(200).json({ message: "done" });
+    const groomingService=new GroomingService({
+      ...req.body,
+      providerId:req.groomingProviderId,
+    })
+    await groomingService.save()
+    res.status(200).json({ message: groomingService });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -14,7 +21,9 @@ const handleAddGroomingService = async (req, res) => {
 const handleModifyGroomingService = async (req, res) => {
   try {
     validationGroomingServiceUpdateData(req)
-    res.status(200).json({ message: "done" });
+    const result=await GroomingService.findByIdAndUpdate(req.params.serviceId,req.body)//todo)
+    if(!result) throw new Error("Service not found / Not updated")
+    res.status(200).json({ message: result });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -22,15 +31,29 @@ const handleModifyGroomingService = async (req, res) => {
 
 const handleGetOneGroomingService = async (req, res) => {
   try {
-    res.status(200).json({ message: "done" });
+    if(!validator.isMongoId(req.params.serviceId)) throw new Error ("Not valid service id")
+      const result= await GroomingService.findById(req.params.serviceId)
+    res.status(200).json({ message: result });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
 };
 
 const handleRateGroomingService = async (req, res) => {
-  try {
-    res.status(200).json({ message: "done" });
+  try {//todo
+    if(!validator.isMongoId(req.params.serviceId)) throw new Error ("Not valid service id")
+      const groomingService= await GroomingService.findById(req.params.serviceId)
+    if(!groomingService) throw new Error ("Service not found");
+    
+    const{average,count}=groomingService.ratings;
+    const{rating}=req.body;
+    if(rating===undefined || typeof rating!=="number") throw new Error("Rating must be a number")
+    if(rating<1 || rating>5) throw new Error("Rating should between 1 to 5")
+    const newAvg=(average*count+req.body.rating)/(count+1);
+    groomingService.ratings.average=Number(newAvg);
+    groomingService.ratings.count=count+1;
+  await groomingService.save()
+    res.status(200).json({ message: `Rating ${groomingService.ratings}` });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -38,7 +61,9 @@ const handleRateGroomingService = async (req, res) => {
 
 const handleDeleteOneGroomingService = async (req, res) => {
   try {
-    res.status(200).json({ message: "done" });
+    if(!validator.isMongoId(req.params.serviceId)) throw new Error ("Not valid service id")
+      const result= await GroomingService.findByIdAndDelete(req.params.serviceId)
+    res.status(200).json({ message: `"Deleted" ${result._id}` });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -46,7 +71,8 @@ const handleDeleteOneGroomingService = async (req, res) => {
 
 const handleGetAllGroomingServices = async (req, res) => {
   try {
-    res.status(200).json({ message: "done" });
+      const result= await GroomingService.find({})
+    res.status(200).json({ message: result });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -59,9 +85,9 @@ const handleGetAllGroomingServices = async (req, res) => {
 const handleDeleteOneGroomingServiceProvider = async (req, res) => {
   try {
 const result= await GroomingProvider.findByIdAndDelete(req.params.id)
-//todo releted services delete
 if(!result) throw new Error("Not deleted")
-    res.status(200).json({ message: "done" });
+  const deleteServices=await GroomingService.deleteMany({providerId:result._id})
+    res.status(200).json({ message:`deleted ${result}, service Deleted: ${deleteServices.deletedCount}` });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }

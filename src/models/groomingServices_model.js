@@ -30,6 +30,7 @@ const groomingServiceSchema = new mongoose.Schema(
       },
       currency: {
         type: String,
+        enum:["INR","USD"],
         default: "INR",
         uppercase: true,
         trim: true,

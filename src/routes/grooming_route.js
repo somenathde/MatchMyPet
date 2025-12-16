@@ -29,12 +29,12 @@ router.patch("/provider/:id/remove-admin",authorizeGroomingProviderAdmin, handle
 router.delete("/provider/:id", authenticateAdmin, handleDeleteOneGroomingServiceProvider);
 
 
-router.post("/", authorizeGroomingProviderAdmin, handleAddGroomingService);
-router.put("/",authorizeGroomingProviderAdmin,handleModifyGroomingService);
-router.get("/:id", handleGetOneGroomingService);
-router.get("/", handleGetAllGroomingServices);
-router.delete("/:id", authorizeGroomingProviderAdmin, handleDeleteOneGroomingService);//owner
-router.post("/:id/give-rating", handleRateGroomingService);
+router.post("/service/:id", authorizeGroomingProviderAdmin, handleAddGroomingService);
+router.put("/service/:id/:serviceId",authorizeGroomingProviderAdmin,handleModifyGroomingService);
+router.get("/service/:id/:serviceId", handleGetOneGroomingService);
+router.get("/service", handleGetAllGroomingServices);
+router.delete("/service/:id/:serviceId", authorizeGroomingProviderAdmin, handleDeleteOneGroomingService);//owner
+router.post("/service/:id/:serviceId/give-rating", handleRateGroomingService);
 
 
 module.exports = router;
