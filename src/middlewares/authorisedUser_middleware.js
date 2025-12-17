@@ -1,7 +1,11 @@
 const Shelter = require("../models/shelter_model");
 const AdoptPet = require("../models/adoptPet_model");
 const LostAndFound=require("../models/lostAndFound_model")
-const GroomingProvider=require("../models/groomingProvider_model")
+const GroomingProvider=require("../models/groomingProvider_model");
+const Store=require("../models/store_model")
+
+const validator=require("validator")
+
 
 async function authorisedUsertoModifyPetDetails(req, res, next) {
   try {
@@ -48,4 +52,23 @@ async function authorizeGroomingProviderAdmin(req,res,next) {
   }
 }
 
-module.exports = { authorisedUsertoModifyPetDetails,authorisedUserToEditLostFoundPetDetail,authorizeGroomingProviderAdmin };
+async function authorisedStoreAdmin(req,res,next) {
+  try {
+    if(!req.adminsUserId){
+      const storeId=req.params.sid;
+    if(!validator.isMongoId(storeId)) throw new Error ("Not a valid Store")
+      const store= await Store.findById(storeId)
+    if(!store)throw new Error("Store not found");
+    const isAdmin=store.ownerId.equals(req.userId) || store.adminsUserId.includes(req.userId)
+    if(!isAdmin) throw new Error("Not Authorised");
+    else req.adminsUserId=req.userId;
+
+    }
+    next()
+    
+  } catch (error) {
+    res.status(400).json({errror:error.message})
+  }
+}
+
+module.exports = { authorisedUsertoModifyPetDetails,authorisedUserToEditLostFoundPetDetail,authorizeGroomingProviderAdmin,authorisedStoreAdmin };

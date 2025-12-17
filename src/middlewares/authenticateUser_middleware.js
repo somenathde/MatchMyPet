@@ -48,9 +48,6 @@ async function authenticateShelterAdmin(req,res,next) {
 }
 
 
-const authenticateStoreAdmin=async(req,res)=>{
-    //todo
-    next()
-}
 
-module.exports={authenticateUser, authenticateAdmin,authenticateShelterAdmin,authenticateStoreAdmin};
+
+module.exports={authenticateUser, authenticateAdmin,authenticateShelterAdmin};

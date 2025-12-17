@@ -14,6 +14,13 @@ const storeSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 100,
     },
+    businessName: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 3,
+      maxlength: 100,
+    },
     description: {
       type: String,
       maxlength: 200,
@@ -42,7 +49,7 @@ const storeSchema = new mongoose.Schema(
 
     address: {
       street:{type:String,maxlength:50}, 
-      city: {type:String,maxlength:50},
+      city: {type:String,minlength:2,maxlength:50,required:true},
       state: {type:String,maxlength:50}, 
       pincode:{type:String,required:true, match: [/^[0-9]{6}$/, "Pincode must be 6 digit"]}, 
       country: {
@@ -50,6 +57,22 @@ const storeSchema = new mongoose.Schema(
         default: "India",maxlength:50
       },
     },
+    documents: {
+      gstNumber: {type:String,maxlength:15},
+      licenseNumber:{type:String, maxlength:50},
+      document: {
+      type: [String],
+      default: [],
+      validate: {
+        validator: (arr) => arr.length <= 4,
+        message: "Maximum 4 images allowed",
+      },
+    },
+    },
+    isVerified:{
+      type: Boolean,
+      default: true,
+    }
   },
   { timestamps: true }
 );

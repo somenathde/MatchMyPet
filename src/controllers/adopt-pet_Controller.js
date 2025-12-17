@@ -1,7 +1,10 @@
 const { truncate } = require("fs");
 const AdoptPet = require("../models/adoptPet_model");
 const Shelter = require("../models/shelter_model");
-const { validatePetAdoptRegisterData } = require("../utils/validation");
+const {
+  validatePetAdoptRegisterData,
+  validatePetAdoptUpdateData,
+} = require("../utils/validation");
 const handleGetAllAdoptablePet = async (req, res) => {
   try {
     const adopatablePets = await AdoptPet.find({ adoptStatus: "Available" });
@@ -89,8 +92,7 @@ const handleUpdateOnePetWithId = async (req, res) => {
     });
     if (!isUPDATE_ALLOWED)
       throw new Error("All seleted fields are not allowed");
-   // todo validatePetAdoptUpdateData(req);
-
+    validatePetAdoptUpdateData(req);
     const result = await AdoptPet.findByIdAndUpdate(req.params.id, data, {
       new: true,
       runValidators: true,
