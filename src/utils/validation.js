@@ -312,6 +312,48 @@ const isAllowed = Object.keys(req.body).every((field) =>
 
 }}
 
+const validateNewProductRegistration=(req)=>{
+const allowed=["category","name","description","MRP","price","images","storeId","stock","isActive"];
+const isallowed=Object.keys(req.body).every((field)=>allowed.includes(field));
+if(!isallowed) throw new Error("All field are not allowed")
+  
+const{category,name,description,MRP,price,images,storeId,stock,isActive}=req.body;
+  if(!storeId)throw new Error("storeId required");
+  if(!validator.isMongoId(storeId) ) throw new Error("not a valid Mongo Id")
+  if(String(storeId)!==req.params.sid) throw new Error("Storeid not valid")
+  if(category===undefined || !["food",  "toys",  "accessories",  "medicine"].includes(category)) throw new Error("shoud be valid category")
+  if(!name || name.length<3 || name.length>100) throw new Error("shoud be 3 to 100 char")
+  if(description&&description.length>800) throw new Error("shoud be below 800 char")
+  if(!MRP||typeof MRP!=="number" || MRP<1) throw new Error("Minimum value 1")
+  if(price===undefined||typeof price!=="number"||price<0) throw new Error("Price should be minimum 0");
+  if(price>MRP)throw new Error("Price should be less than or equal MRP")
+  if(images&&!Array.isArray(images)) throw new Error("should be array")
+  if(images&&images.length>10) throw new Error("only 10 image allowed")
+  if(images){ for (const image of images){if(!validator.isURL(image))throw new Error("not a valid url")}}
+  if(stock!==undefined&&(typeof stock!=="number" || stock<0))  throw new Error("minimum stock 0 or Number")
+  if(isActive!==undefined&&typeof isActive!=="boolean") throw new Error("only boolean acepected")
+}
+
+const validateUpdateProductData=(req)=>{
+const allowed=["category","name","description","MRP","price","images","stock","isActive"];
+const isAllowed=Object.keys(req.body).every((field)=>allowed.includes(field));
+if(!isAllowed) throw new Error("All field are not allowed")
+const{category,name,description,MRP,price,images,stock,isActive}=req.body;
+  if(category!==undefined && !["food",  "toys",  "accessories",  "medicine"].includes(category)) throw new Error("shoud be valid category")
+  if(name && (name.length<3 || name.length>100)) throw new Error("shoud be 3 to 100 char")
+  if(description&&description.length>800) throw new Error("shoud be below 800 char")
+  if(MRP!==undefined&&(typeof MRP !=="number" || MRP<1)) throw new Error("MRP Minimum value 1 or Number")
+  if(price!==undefined&&(typeof price !=="number" || price<0)) throw new Error("Price should be more than or equal 0")
+  if(price!==undefined && MRP!==undefined &&price>MRP)throw new Error("Price should be less than or equal MRP")
+  if(images&&!Array.isArray(images)) throw new Error("image should be in array")
+  if(images&&images.length>10) throw new Error("only 10 image allowed")
+  if(images){ for (const image of images){if(!validator.isURL(image))throw new Error("invalid url")}}
+  if(stock!==undefined&&(typeof stock!=="number" || stock<0))  throw new Error("minimum stock 0 or Number")
+  if(isActive!==undefined&&typeof isActive!=="boolean") throw new Error("only boolean acepected")
+}
+
+
+
 module.exports = {
   validationSignupData,
   validationLoginData,
@@ -327,4 +369,6 @@ module.exports = {
   validationGroomingServiceUpdateData,
   validateRegisterStoreData,
   validateUpdateStoreData,
+  validateNewProductRegistration,
+  validateUpdateProductData,
 };

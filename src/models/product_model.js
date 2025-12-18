@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema(
    {
-    category:{type:String, enum:["food",  "toys",  "accessories",  "medicine"]},
+    category:{type:String, enum:["food",  "toys",  "accessories",  "medicine"], required:[true,"category is required"]},
     name: {
       type: String,
       required: true,
@@ -24,6 +24,7 @@ const productSchema = new mongoose.Schema(
     price: {
       type: Number,
       required:true,
+      min:0,
       validate: {
         validator: function (value) {
           return  value <= this.MRP;
@@ -43,7 +44,7 @@ const productSchema = new mongoose.Schema(
 
     storeId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Store",
+      ref: "store",
       required: true,
       index: true,
     },
@@ -74,11 +75,11 @@ const productSchema = new mongoose.Schema(
     4: { type: Number, default: 0 },
     5: { type: Number, default: 0 },
   },
-}
-
+},
+isActive:{type:Boolean,default:true}
   },
   { timestamps: true }
 );
 
-const Store = mongoose.model("store", storeSchema);
-module.exports = Store;
+const Product = mongoose.model("product", productSchema);
+module.exports = Product;

@@ -52,22 +52,21 @@ async function authorizeGroomingProviderAdmin(req,res,next) {
   }
 }
 
-async function authorisedStoreAdmin(req,res,next) {
-  try {
-    if(!req.adminsUserId){
-      const storeId=req.params.sid;
-    if(!validator.isMongoId(storeId)) throw new Error ("Not a valid Store")
-      const store= await Store.findById(storeId)
-    if(!store)throw new Error("Store not found");
-    const isAdmin=store.ownerId.equals(req.userId) || store.adminsUserId.includes(req.userId)
-    if(!isAdmin) throw new Error("Not Authorised");
-    else req.adminsUserId=req.userId;
 
-    }
+async function authorisedStoreAdmin(req,res,next) {
+ 
+  try {
+    if(res.locals.isStoreAdmin)return next()
+    const storeId=req.params.sid;
+    if(!storeId)throw new Error("StoreId needed")
+    if(!validator.isMongoId(storeId)) throw new Error ("Not a valid Store")
+    const store= await Store.findOne({_id:storeId,$or:[{ownerId:req.userId},{adminsUserId:req.userId}]}).select("_id")
+    if(!store)throw new Error("unauthorised");
+    res.locals.isStoreAdmin = true;
     next()
-    
+
   } catch (error) {
-    res.status(400).json({errror:error.message})
+    res.status(400).json({error:error.message})
   }
 }
 
