@@ -353,6 +353,25 @@ const{category,name,description,MRP,price,images,stock,isActive}=req.body;
 }
 
 
+const validationOrderData=(req)=>{
+  if(!req.params.sid || !validator.isMongoId(req.params.sid)) throw new Error ("not valid sore id")
+  const{items,address,paymentMethod}=req.body;
+  if(!Array.isArray(items)||items.length<1) throw new Error("Item should be array, and not empty");
+  items.forEach((item,index)=>{
+    if(!item.productId || !validator.isMongoId(item.productId))throw new Error(`Invalid ProductId: Not A Mongo ID,at index${index+1}`);
+  if(typeof item.qty!=="number" || item.qty<1) throw new Error (`Qty shoud be number or min 1, at index ${index+1}`);
+  })
+  if(!address || typeof address!=="object")throw new Error ("address required");
+  if(!address?.addressLine1 ||address.addressLine1.length<2 || address.addressLine1.length>100  )throw new Error ("addressLine1 shoud be 2 to 100 char");
+  if(address?.addressLine2 &&  address.addressLine2.length>100  )throw new Error ("addressLine2 shoud be 2 to 100 char");
+  if(!address?.phone || !validator.isMobilePhone(address.phone,"en-IN") ) throw new Error("Shoud be valid mob no")
+  if(address?.street && address.street.length>100) throw new Error("max 100 char to allowed")
+  if(!address?.city ||( address.city.length<2 ||address.city.length>50)) throw new Error("max 2-50 char to allowed for city")
+  if(!address?.state || address.state.length>100) throw new Error("max 100 char to allowed for state")
+  if(!address?.pincode || !/^\d{6}$/.test(address.pincode)) throw new Error("pincode should be 6 digit")
+  if(address?.country && address.country.length>100) throw new Error("max 100 char to allowed for country")
+  if(!["cod","razorpay"].includes(paymentMethod)) throw new Error("Payment method not allowed")
+  }
 
 module.exports = {
   validationSignupData,
@@ -371,4 +390,5 @@ module.exports = {
   validateUpdateStoreData,
   validateNewProductRegistration,
   validateUpdateProductData,
+  validationOrderData,
 };

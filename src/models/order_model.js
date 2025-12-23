@@ -18,6 +18,7 @@ const orderItemSchema = new mongoose.Schema(
       required: true,
       min: [0, "Price cannot be negative"],
     },
+    name:{type:String}
   },
   { _id: false }
 );
@@ -34,7 +35,7 @@ const orderSchema = new mongoose.Schema(
       type: [orderItemSchema],
       validate: [
         {
-          validator: (item) => item.length > 0,
+          validator: (item) =>  Array.isArray(item) && item.length > 0 ,
           message: "Order must contain at least one item",
         },
       ],
@@ -42,18 +43,22 @@ const orderSchema = new mongoose.Schema(
     },
 
     totalAmount: {
-      type: Number,required: true, min: [0, "Total amount cannot be negative"],
+      type: Number,required: true, min: [0, "Total amount cannot be negative"], validate:{validator:function(){
+        const sum=this.items.reduce((acc,curr)=>{return acc+curr.price*curr.qty},0)
+        return Math.round(sum*100)===Math.round(this.totalAmount*100)
+      },message:"Amount Mismatch:Total amount not match with order items"}
     },
 
     address: {
       name:{ type: String, required: true, trim: true, minlength: 2,maxlength:100},
-      AddressLine_1: { type: String, required: true, trim: true, minlength: 10,maxlength:100},
-      AddressLine_2: { type: String,trim: true,maxlength:100},
-      pincode: {type: String,match: [/^[0-9]{6}$/, "Pincode must be 6 digit"]},
+      addressLine1: { type: String, required: true, trim: true, minlength: 10,maxlength:100},
+      addressLine2: { type: String,trim: true,maxlength:100},
+      street:{ type: String, maxlength:100},
+      pincode: {type: String,required:true,trim:true,match: [/^[0-9]{6}$/, "Pincode must be 6 digit"],},
       city: {type: String, required: true, trim: true,maxlength:100},
       state: {type: String, required: true,trim: true,maxlength:100},
       country: {type: String, default: "India",maxlength:100},
-      phone:{type: String,match: [/^[0-9]{10}$/, "Phone must be 10 digit"]},
+      phone:{type: String,required:true, trim:true,match: [/^[0-9]{10}$/, "Phone must be 10 digit"],},
     },
 
     status: {
@@ -90,7 +95,26 @@ const orderSchema = new mongoose.Schema(
     shippedAt: Date,
     deliveredAt: Date,
     cancelledAt: Date,
+    shipping: {
+        courier: {type: String,trim: true},
+        trackingId:{type: String,trim: true,index: true},
+        trackingUrl:{type: String,trim: true}
+      }
   },
   {timestamps: true})
 
-module.exports = mongoose.model("order", orderSchema)
+  orderSchema.pre("save",function(){
+    this.isPaid=this.payment?.status==="paid";
+    if(this.status==="shipped" && !this.shippedAt) this.shippedAt=new Date();
+    if(this.status==="delivered" && !this.deliveredAt) this.deliveredAt=new Date();
+    if(this.status==="cancelled" && !this.cancelledAt) this.cancelledAt=new Date();
+    
+  })
+  orderSchema.index({userId:1,createdAt:-1})
+  orderSchema.index({status:1,createdAt:-1})
+  orderSchema.index({"payment.orderId":1})
+
+
+
+ const Order= mongoose.model("order", orderSchema);
+ module.exports=Order;
