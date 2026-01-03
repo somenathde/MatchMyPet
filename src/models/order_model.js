@@ -99,8 +99,15 @@ const orderSchema = new mongoose.Schema(
         courier: {type: String,trim: true},
         trackingId:{type: String,trim: true,index: true},
         trackingUrl:{type: String,trim: true}
-      }
+      },
+    storeId: {type: mongoose.Schema.Types.ObjectId,
+      ref: "store",
+      required: true,
+      index: true
+},
+
   },
+  
   {timestamps: true})
 
   orderSchema.pre("save",function(){

@@ -82,28 +82,7 @@ const handleGetOneStore = async (req, res) => {
 
 
 
-const handleGetAllReceivedOrders = async (req, res) => {
-  try {
-    res.status(200).json({ message: "done" });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
-const handleModifyQuantityofOrderedProduct = async (req, res) => {
-  try {
-    res.status(200).json({ message: "done" });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
 
-const handleModifyOderStatusAndTracking = async (req, res) => {
-  try {
-    res.status(200).json({ message: "done" });
-  } catch (error) {
-    res.status(400).json({ error: error.message });
-  }
-};
 
 
 module.exports = {
@@ -113,8 +92,4 @@ module.exports = {
   handleRemoveAdmin,
   handleGetOneStore,
   handleGetAllStore,
-
-  handleGetAllReceivedOrders,
-  handleModifyOderStatusAndTracking,
-  handleModifyQuantityofOrderedProduct,
 };
