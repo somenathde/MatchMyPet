@@ -4,8 +4,8 @@ const { validationUpdateUserData } = require("../utils/validation");
 async function getSingleUser(req, res) {
   try {
     const id = req.params.id;
-    const detailOfOtherUser=await User.findById({_id:id},{firstName:1,lastName:1,pet_owner:1,_id:0})
-    if(!detailOfOtherUser) throw new Error ("User Not Found")
+    const detailOfOtherUser = await User.findById({ _id: id }, { firstName: 1, lastName: 1, pet_owner: 1, _id: 0 })
+    if (!detailOfOtherUser) throw new Error("User Not Found")
     res.status(200).json({ message: detailOfOtherUser });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -21,7 +21,7 @@ async function deleteUser(req, res) {
     } else {
       const result = await User.findByIdAndDelete({ _id: userId });
       if (!result) throw new Error("Unknown Error");
-      res.cookie("token", null,{expires: new Date(Date.now())}).status(200).json({ message: "Deleted Successfully",token:null });
+      res.cookie("token", null, { expires: new Date(Date.now()) }).status(200).json({ message: "Deleted Successfully", token: null });
     }
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -31,23 +31,23 @@ async function deleteUser(req, res) {
 const getUserPet = async (req, res) => {
   const id = req.params.id;
   try {
-     const userPet=await User.findById(id,{pet_owner:1 ,_id:0})
-     if(!userPet) throw new Error ("Invalid Id")
+    const userPet = await User.findById(id, { pet_owner: 1, _id: 0 })
+    if (!userPet) throw new Error("Invalid Id")
 
-  res.status(200).json({userPet})
+    res.status(200).json({ userPet })
   } catch (error) {
-    res.status(400).json({error:error})
+    res.status(400).json({ error: error })
   }
 };
 
 async function getallUser(req, res) {
   try {
-     const allUser=await User.find({},{firstName:1, lastName: 1 })
-  res.status(200).json({allUser})
+    const allUser = await User.find({}, { firstName: 1, lastName: 1 })
+    res.status(200).json({ allUser })
   } catch (error) {
-    res.status(400).json({error:error})
+    res.status(400).json({ error: error })
   }
- 
+
 }
 
 async function updateUser(req, res) {
@@ -64,6 +64,29 @@ async function updateUser(req, res) {
     res.status(400).json({ error: error.message });
   }
 }
+async function getMyProfile(req, res) {
+  try {
+    const user = await User.findById(req.userId, {
+      firstName: 1,
+      lastName: 1,
+      emailId: 1,
+      phone: 1,
+      role: 1,
+      address: 1,
+      pet_owner: 1
+    })
+    res.status(200).json({
+      "success": true,
+      "message": "User fetched successfully",
+      "data": user
+    });
+  } catch (error) {
+    res.status(500).json({
+      "success": false,
+      "message": error.message
+    });
+  }
+}
 
 module.exports = {
   getSingleUser,
@@ -71,4 +94,5 @@ module.exports = {
   updateUser,
   getallUser,
   getUserPet,
+  getMyProfile
 };

@@ -1,9 +1,10 @@
 const express= require('express')
 const router = express.Router({ mergeParams: true })
 const {authenticateAdmin}=require("../middlewares/authenticateUser_middleware")
-const {getSingleUser, deleteUser, updateUser, getallUser,getUserPet}=require("../controllers/user_controller")
+const {getSingleUser, deleteUser, updateUser, getallUser,getUserPet,getMyProfile}=require("../controllers/user_controller")
 
 
+router.get("/me",getMyProfile )
 router.get("/:id",getSingleUser )
 
 router.put("/:id",updateUser)

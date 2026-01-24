@@ -30,9 +30,15 @@ async function handleSignup(req, res) {
 
     await user.save();
 
-    res.status(200).json("Account created Successfully");
+    res.status(200).json({
+      success: true,
+      message: "Account created successfully"
+    });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
   }
 }
 
@@ -50,21 +56,24 @@ async function handleLogin(req, res) {
       res.status(200).json({ message: "app log Successfully", token });
     } else {
       res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "Lax",
+        secure: false,
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       });
-      res.status(200).json({ message: "web log Successfully", user});
+      res.status(200).json({ message: "web log Successfully", user });
     }
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
 }
 
-const handleLogout=async(req,res)=>{
-try {
-      res.cookie("token", null,{expires: new Date(Date.now())}).status(200).json({ message: "logout Successfully",token:null });
-} catch (error) {
-   res.status(500).json({ error: err.message });
-}
+const handleLogout = async (req, res) => {
+  try {
+    res.cookie("token", null, { expires: new Date(Date.now()) }).status(200).json({ message: "logout Successfully", token: null });
+  } catch (error) {
+    res.status(500).json({ error: err.message });
+  }
 }
 
 module.exports = { handleLogin, handleSignup, handleLogout };
