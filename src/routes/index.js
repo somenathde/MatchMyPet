@@ -12,15 +12,18 @@ const storesRoute=require("./stores_route")
 const ordersRoute=require("./orders_route")
 const adminRoute=require("./admin_route")
 
+
+//Public
 router.use("/auth",authRoute)
+router.use("/adopt-pet",adoptpetRoute)
+router.use("/lost-and-found",lostAndFoundRoute)
+router.use("/grooming",groomingRoute)
+router.use("/stores",storesRoute)
+//Private
 router.use("/user",authenticateUser,userRoute)
 router.use("/shelter",authenticateUser,shelterRoute)
-router.use("/adopt-pet",authenticateUser,adoptpetRoute)
-router.use("/lost-and-found",authenticateUser,lostAndFoundRoute)
-router.use("/grooming",authenticateUser,groomingRoute)
-router.use("/stores",authenticateUser,storesRoute)
 router.use("/orders",authenticateUser,ordersRoute)
-router.use("/admin",authenticateAdmin,authenticateUser,adminRoute)
+router.use("/admin",authenticateUser,authenticateAdmin,adminRoute)
 
 
 

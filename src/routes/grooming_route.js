@@ -4,6 +4,7 @@ const {
   authenticateAdmin,
 } = require("../middlewares/authenticateUser_middleware");
 const {authorizeGroomingProviderAdmin}=require("../middlewares/authorisedUser_middleware")
+const {authenticateUser}=require("../middlewares/authenticateUser_middleware")
 const {
   handleDeleteOneGroomingService,
   handleAddGroomingService,
@@ -20,21 +21,21 @@ const {
   handleRemoveAdminGroomingServicesProvider
 } = require("../controllers/grooming_controller");
 
-router.post("/provider", handleAddGroomingServiceProvider);
-router.put("/provider/:id", authorizeGroomingProviderAdmin, handleModifyGroomingServiceProvider);
-router.get("/provider/:id",handleGetOneGroomingServiceProvider);
-router.get("/provider", handleGetAllGroomingServicesProvider);
-router.patch("/provider/:id/add-admin", authorizeGroomingProviderAdmin, handleAddAdminGroomingServicesProvider);
-router.patch("/provider/:id/remove-admin",authorizeGroomingProviderAdmin, handleRemoveAdminGroomingServicesProvider);
-router.delete("/provider/:id", authenticateAdmin, handleDeleteOneGroomingServiceProvider);
+router.post("/provider",authenticateUser, handleAddGroomingServiceProvider);
+router.put("/provider/:id",authenticateUser, authorizeGroomingProviderAdmin, handleModifyGroomingServiceProvider);
+router.get("/provider/:id",authenticateUser,handleGetOneGroomingServiceProvider);
+router.get("/provider",authenticateUser, handleGetAllGroomingServicesProvider);
+router.patch("/provider/:id/add-admin",authenticateUser, authorizeGroomingProviderAdmin, handleAddAdminGroomingServicesProvider);
+router.patch("/provider/:id/remove-admin",authenticateUser,authorizeGroomingProviderAdmin, handleRemoveAdminGroomingServicesProvider);
+router.delete("/provider/:id",authenticateUser, authenticateAdmin, handleDeleteOneGroomingServiceProvider);
 
 
-router.post("/service/:id", authorizeGroomingProviderAdmin, handleAddGroomingService);
-router.put("/service/:id/:serviceId",authorizeGroomingProviderAdmin,handleModifyGroomingService);
-router.get("/service/:id/:serviceId", handleGetOneGroomingService);
+router.post("/service/:id",authenticateUser, authorizeGroomingProviderAdmin, handleAddGroomingService);
+router.put("/service/:id/:serviceId",authenticateUser,authorizeGroomingProviderAdmin,handleModifyGroomingService);
+router.get("/service/:id/:serviceId",authenticateUser, handleGetOneGroomingService);
 router.get("/service", handleGetAllGroomingServices);
-router.delete("/service/:id/:serviceId", authorizeGroomingProviderAdmin, handleDeleteOneGroomingService);//owner
-router.post("/service/:id/:serviceId/give-rating", handleRateGroomingService);
+router.delete("/service/:id/:serviceId",authenticateUser, authorizeGroomingProviderAdmin, handleDeleteOneGroomingService);//owner
+router.post("/service/:id/:serviceId/give-rating",authenticateUser, handleRateGroomingService);
 
 
 module.exports = router;
