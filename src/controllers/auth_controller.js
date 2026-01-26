@@ -1,4 +1,5 @@
 const User = require("../models/user_model");
+const throwError = require("../utils/throwError")
 
 
 const {
@@ -30,15 +31,10 @@ async function handleSignup(req, res) {
 
     await user.save();
 
-    res.status(200).json({
-      success: true,
-      message: "Account created successfully"
-    });
-  } catch (err) {
-    res.status(400).json({
-      success: false,
-      message: err.message,
-    });
+    res.status(200).json({ success: true, cmessage: "Account created successfully", data: user });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 }
 
@@ -47,13 +43,13 @@ async function handleLogin(req, res) {
     const clientType = req.headers["x-client-type"];
     validationLoginData(req.body.emailId);
     const user = await User.findOne({ emailId: req.body.emailId });
-    if (!user) throw new Error("Invalid Credentials");
+    if (!user) throwError("Invalid Credentials", 400);
     else if (!(await comparePassword(req.body.password, user.password))) {
-      throw new Error("Invalid Credentials");
+      throwError("Invalid Credentials", 400);
     }
     const token = await generateToken(user._id);
     if (clientType === "app") {
-      res.status(200).json({ message: "app log Successfully", token });
+      res.status(200).json({ success: true, message: "app log Successfully", data: token });
     } else {
       res.cookie("token", token, {
         httpOnly: true,
@@ -61,18 +57,20 @@ async function handleLogin(req, res) {
         secure: false,
         expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
       });
-      res.status(200).json({ message: "web log Successfully", user });
+      res.status(200).json({ success: true, message: "web log Successfully", data: user });
     }
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 }
 
 const handleLogout = async (req, res) => {
   try {
-    res.cookie("token", null, { expires: new Date(Date.now()) }).status(200).json({ message: "logout Successfully", token: null });
+    res.cookie("token", null, { expires: new Date(Date.now()) }).status(200).json({ success: true, message: "logout Successfully", token: null });
   } catch (error) {
-    res.status(500).json({ error: err.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 }
 

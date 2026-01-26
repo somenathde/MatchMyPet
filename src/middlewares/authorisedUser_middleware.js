@@ -1,73 +1,78 @@
 const Shelter = require("../models/shelter_model");
 const AdoptPet = require("../models/adoptPet_model");
-const LostAndFound=require("../models/lostAndFound_model")
-const GroomingProvider=require("../models/groomingProvider_model");
-const Store=require("../models/store_model")
-
-const validator=require("validator")
+const LostAndFound = require("../models/lostAndFound_model")
+const GroomingProvider = require("../models/groomingProvider_model");
+const Store = require("../models/store_model")
+const validator = require("validator")
+const throwError = require("../utils/throwError")
 
 
 async function authorisedUsertoModifyPetDetails(req, res, next) {
   try {
-    const pet = await AdoptPet.findById({ _id: req.params.id });
-    if (!pet) throw new Error("not found");
+    const pet = await AdoptPet.findById(req.params.id);
+    if (!pet) throwError("not found", 404);
     if (!pet.ownerId.equals(req.userId)) {
-      if (!pet.shelterId) throw new Error("not authorised");
+      if (!pet.shelterId) throwError("You are not allowed", 403);
       const shelter = await Shelter.findById({ _id: pet.shelterId });
-      if (!shelter) throw new Error("not authorised");
+      if (!shelter) throwError("You are not allowed", 403);
       if (!shelter.adminsUserId.includes(req.userId))
-        throw new Error("not authorised");
+        throwError("You are not allowed", 403);
     }
     next();
   } catch (error) {
-    res.status(401).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 }
 
 
-async function authorisedUserToEditLostFoundPetDetail(req,res,next) {
+async function authorisedUserToEditLostFoundPetDetail(req, res, next) {
   try {
-    const petId=req.params.id;
-  const lostAndFoundPet=await LostAndFound.findById(petId);
-  if(!lostAndFoundPet) throw new Error("Pet Not Found");
-  if(!lostAndFoundPet.userId.equals(req.userId)) throw new Error("Not authorised")
+    const petId = req.params.id;
+    const lostAndFoundPet = await LostAndFound.findById(petId);
+    if (!lostAndFoundPet) throwError("Pet Not Found", 400);
+    if (!lostAndFoundPet.userId.equals(req.userId)) throwError("Not authorised", 403)
     next()
   } catch (error) {
-    res.status(400).json({errror:error.message})
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
-  
+
 }
 
 
-async function authorizeGroomingProviderAdmin(req,res,next) {
+async function authorizeGroomingProviderAdmin(req, res, next) {
   try {
-    if(!req.groomingProviderId) {
-    const groomingProvider=await GroomingProvider.findById(req.params.id)
-    const isAdmin = groomingProvider.ownerId.equals(req.userId) || groomingProvider.admins.map(id => id.toString()).includes(req.userId)
-    if(!isAdmin) throw new Error("User Not a Service providerAdmin")
-      req.groomingProviderId=groomingProvider._id}
+    if (!req.groomingProviderId) {
+      const groomingProvider = await GroomingProvider.findById(req.params.id)
+      const isAdmin = groomingProvider.ownerId.equals(req.userId) || groomingProvider.admins.map(id => id.toString()).includes(req.userId)
+      if (!isAdmin) throwError("User Not a Service providerAdmin", 403)
+      req.groomingProviderId = groomingProvider._id
+    }
     next()
   } catch (error) {
-    res.status(400).json({errror:error.message})
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 }
 
 
-async function authorisedStoreAdmin(req,res,next) {
- 
+async function authorisedStoreAdmin(req, res, next) {
+
   try {
-    if(res.locals.isStoreAdmin)return next()
-    const storeId=req.params.sid;
-    if(!storeId)throw new Error("StoreId needed")
-    if(!validator.isMongoId(storeId)) throw new Error ("Not a valid Store")
-    const store= await Store.findOne({_id:storeId,$or:[{ownerId:req.userId},{adminsUserId:req.userId}]}).select("_id")
-    if(!store)throw new Error("unauthorised");
+    if (res.locals.isStoreAdmin) return next()
+    const storeId = req.params.sid;
+    if (!storeId) throwError("StoreId needed", 400)
+    if (!validator.isMongoId(storeId)) throwError("Not a valid Store", 400)
+    const store = await Store.findOne({ _id: storeId, $or: [{ ownerId: req.userId }, { adminsUserId: req.userId }] }).select("_id")
+    if (!store) throwError("unauthorised", 403);
     res.locals.isStoreAdmin = true;
     next()
 
   } catch (error) {
-    res.status(400).json({error:error.message})
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 }
 
-module.exports = { authorisedUsertoModifyPetDetails,authorisedUserToEditLostFoundPetDetail,authorizeGroomingProviderAdmin,authorisedStoreAdmin };
+module.exports = { authorisedUsertoModifyPetDetails, authorisedUserToEditLostFoundPetDetail, authorizeGroomingProviderAdmin, authorisedStoreAdmin };

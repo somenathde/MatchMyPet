@@ -1,38 +1,43 @@
 
 const handleDashboard = async (req, res) => {
   try {
-    res.status(200).json({ message: "done" });
+    res.status(200).json({ success: true, message: "Done", data: null });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 };
 const handleAllusers = async (req, res) => {
   try {
-    res.status(200).json({ message: "done" });
+    res.status(200).json({ success: true, message: "Done", data: null });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 };
 const handleAllAdoptPet = async (req, res) => {
   try {
-    res.status(200).json({ message: "done" });
+    res.status(200).json({ success: true, message: "Done", data: null });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 };
 const handleLostAndFoundPets = async (req, res) => {
   try {
-    res.status(200).json({ message: "done" });
+    res.status(200).json({ success: true, message: "Done", data: null });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 };
 const handleDeleteLostAndFoundPets = async (req, res) => {
   try {
-    res.status(200).json({ message: "done" });
+    res.status(200).json({ success: true, message: "Done", data: null });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 };
 
-module.exports={handleDashboard,handleAllusers,handleAllAdoptPet,handleLostAndFoundPets,handleDeleteLostAndFoundPets}
+module.exports = { handleDashboard, handleAllusers, handleAllAdoptPet, handleLostAndFoundPets, handleDeleteLostAndFoundPets }

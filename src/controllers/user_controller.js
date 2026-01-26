@@ -1,14 +1,16 @@
 const User = require("../models/user_model");
 const { validationUpdateUserData } = require("../utils/validation");
+const throwError = require("../utils/throwError")
 
 async function getSingleUser(req, res) {
   try {
     const id = req.params.id;
     const detailOfOtherUser = await User.findById({ _id: id }, { firstName: 1, lastName: 1, pet_owner: 1, _id: 0 })
-    if (!detailOfOtherUser) throw new Error("User Not Found")
-    res.status(200).json({ message: detailOfOtherUser });
+    if (!detailOfOtherUser) throwError("User Not Found", 404)
+    res.status(200).json({ success: true, message: "User Fetched successfully", data: detailOfOtherUser });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 }
 
@@ -17,14 +19,15 @@ async function deleteUser(req, res) {
     const userId = req.userId;
     const id = req.params.id;
     if (id !== userId) {
-      throw new Error("Unauthorised to delete other user");
+      throwError("Unauthorised to delete other user", 403);
     } else {
       const result = await User.findByIdAndDelete({ _id: userId });
-      if (!result) throw new Error("Unknown Error");
-      res.cookie("token", null, { expires: new Date(Date.now()) }).status(200).json({ message: "Deleted Successfully", token: null });
+      if (!result) throwError("Unknown Error", 404);
+      res.cookie("token", null, { expires: new Date(Date.now()) }).status(200).json({ success: true, message: "Deleted Successfully", token: null });
     }
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 }
 
@@ -32,36 +35,39 @@ const getUserPet = async (req, res) => {
   const id = req.params.id;
   try {
     const userPet = await User.findById(id, { pet_owner: 1, _id: 0 })
-    if (!userPet) throw new Error("Invalid Id")
+    if (!userPet) throwError("Invalid Id", 404)
 
-    res.status(200).json({ userPet })
+    res.status(200).json({ success: true, message: "Successfully fetched userpet", data: userPet })
   } catch (error) {
-    res.status(400).json({ error: error })
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 };
 
 async function getallUser(req, res) {
   try {
     const allUser = await User.find({}, { firstName: 1, lastName: 1 })
-    res.status(200).json({ allUser })
+    res.status(200).json({ success: true, message: "Successfully fetched all user", data: allUser })
   } catch (error) {
-    res.status(400).json({ error: error })
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 
 }
 
 async function updateUser(req, res) {
   try {
-    if (req.userId !== req.params.id) throw new Error("Unauthosised Request, You can't adit other user");
+    if (req.userId !== req.params.id) throwError("Unauthosised Request, You can't adit other user", 403);
     validationUpdateUserData(req)
     const loggedInUser = await User.findById(req.userId);
     Object.keys(req.body).forEach((key) => {
       loggedInUser[key] = req.body[key];
     });
     await loggedInUser.save();
-    res.status(200).json({ message: "User Update successfully" });
+    res.status(200).json({ success: true, message: "User Update successfully", data: loggedInUser });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 }
 async function getMyProfile(req, res) {
@@ -75,16 +81,10 @@ async function getMyProfile(req, res) {
       address: 1,
       pet_owner: 1
     })
-    res.status(200).json({
-      "success": true,
-      "message": "User fetched successfully",
-      "data": user
-    });
+    res.status(200).json({ success: true, message: "User fetched successfully", data: user });
   } catch (error) {
-    res.status(500).json({
-      "success": false,
-      "message": error.message
-    });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 }
 

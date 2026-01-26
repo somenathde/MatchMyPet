@@ -16,19 +16,21 @@ const registerShelter = async (req, res) => {
     });
     await shelter.save();
 
-    res.status(200).json("Shelter is registered Successfully");
-  } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(201).json({ success: true, message: "Shelter is registered Successfully", data: shelter });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 };
 
-const getPetdetails=async(req,res)=>{
+const getPetdetails = async (req, res) => {
   try {
-    const availablePetForAdopt=null;
-    res.status(200).json({message:availablePetForAdopt});
+    const availablePetForAdopt = null; //TODO
+    res.status(200).json({ success: true, message: "Available Pet Available fetched Successfully", data: availablePetForAdopt });
   } catch (error) {
-    res.status(400).json({ error: err.message });
+    const statusCode = error.statusCode || 500;
+    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
   }
 }
 
-module.exports = { registerShelter,getPetdetails };
+module.exports = { registerShelter, getPetdetails };

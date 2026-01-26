@@ -1,38 +1,39 @@
 const { createHash } = require("crypto");
-const bcrypt=require("bcrypt")
-const jwt=require("jsonwebtoken")
+const bcrypt = require("bcrypt")
+const jwt = require("jsonwebtoken")
+const throwError = require("../utils/throwError")
 async function createPassword(password) {
     try {
-         return await bcrypt.hash(password,10)
+        return await bcrypt.hash(password, 10)
     } catch (error) {
-        throw new Error("failed to generate password")
+        throwError("failed to generate password", 500)
     }
-    
+
 }
-async function comparePassword(myPlaintextPassword,hash) {
+async function comparePassword(myPlaintextPassword, hash) {
     try {
-      return  await bcrypt.compare(myPlaintextPassword, hash)
+        return await bcrypt.compare(myPlaintextPassword, hash)
     } catch (error) {
-        throw new Error("failed to Load password")
+        throwError("failed to Load password", 500)
     }
 }
 
 async function generateToken(id) {
     try {
-        return await jwt.sign({_id:id},process.env.JWT_SECRET,{expiresIn:"1d"});
-       
+        return await jwt.sign({ _id: id }, process.env.JWT_SECRET, { expiresIn: "1d" });
+
     } catch (error) {
-        throw new Error ("Failed to create token")
+        throwError("Failed to create token", 500)
     }
 }
 
 async function verifyToken(token) {
     try {
-        return await jwt.verify(token,process.env.JWT_SECRET)
+        return await jwt.verify(token, process.env.JWT_SECRET)
     } catch (error) {
-        throw new Error ("Not Authorised")
+        throwError("Not Authorised", 401)
     }
 }
 
 
-module.exports={createPassword, comparePassword, generateToken, verifyToken}
+module.exports = { createPassword, comparePassword, generateToken, verifyToken }
