@@ -144,10 +144,13 @@ const validatePetAdoptUpdateData = (req) => {
 
 
 const validationlostAndFoundRegisterPetData = (req) => {
-  const { type, petType, breed, color, lastSeenLocation, description, contactNumber } = req.body
+  const { type, petType, breed, color, lastSeenLocation, description, contactNumber, name, age, gender } = req.body
   if (!["lost", "found"].includes(type)) { throwError("Should be lost or found", 400); }
   else if (!["dog", "cat", "rabbit", "other", "bird"].includes(petType)) { throwError("Please enter correct pet type", 400); }
   else if (breed && breed.length > 25) { throwError("Should be below 25 char", 400) }
+  else if (name && name.length > 50) { throwError("Should be below 50 char", 400) }
+  else if (age && age.length > 20) { throwError("Should be below 20 char", 400) }
+  else if (gender && !["male", "female", "unknown"].includes(gender)) { throwError("Invalid gender type", 400) }
   else if (!color || color.length > 25) { throwError("Should be below 25 char", 400) }
   else if (!lastSeenLocation?.city || lastSeenLocation.city.length > 25) { throwError("Should be below 25 char", 400) }
   else if (!lastSeenLocation?.area || lastSeenLocation.area.length > 25) { throwError("Should be below 25 char", 400) }

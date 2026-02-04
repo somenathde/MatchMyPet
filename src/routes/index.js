@@ -12,7 +12,6 @@ const storesRoute=require("./stores_route")
 const ordersRoute=require("./orders_route")
 const adminRoute=require("./admin_route")
 
-
 //Public
 router.use("/auth",authRoute)
 router.use("/adopt-pet",adoptpetRoute)

@@ -1,4 +1,5 @@
 const LostAndFound = require("../models/lostAndFound_model");
+const validator = require("validator")
 const throwError = require("../utils/throwError")
 const {
   validationlostAndFoundRegisterPetData,
@@ -7,26 +8,9 @@ const {
 const handleregisterLostOrFoundPet = async (req, res) => {
   try {
     validationlostAndFoundRegisterPetData(req);
-    const {
-      type,
-      petType,
-      breed,
-      color,
-      lastSeenLocation,
-      description,
-      contactNumber,
-      images,
-    } = req.body;
     const lostAndFound = new LostAndFound({
       userId: req.userId,
-      type,
-      petType,
-      breed,
-      color,
-      lastSeenLocation,
-      description,
-      contactNumber,
-      images,
+      ...req.body,
     });
     const result = await lostAndFound.save();
     if (!result) throwError("Failed to save", 500);
@@ -86,7 +70,8 @@ const handlegetAllFoundPet = async (req, res) => {
 };
 const handlegetOneLostOrFoundPet = async (req, res) => {
   try {
-    if (!req.params.id) throw new Error("id can't be null")
+    if (!req.params.id) throwError("id can't be null", 404)
+    if (!validator.isMongoId(req.params.id)) throwError("Invalid id format", 400)
     const pet = await LostAndFound.findById(req.params.id);
     if (!pet) throwError("not found", 404)
     res.status(200).json({ success: true, message: "Pet Feched Successfully", data: pet })
@@ -97,7 +82,7 @@ const handlegetOneLostOrFoundPet = async (req, res) => {
 };
 const handlegetAllLostAndFoundPet = async (req, res) => {
   try {
-    const allPets = await LostAndFound.find({ status: "open" });
+    const allPets = await LostAndFound.find({ $or: [{ status: "open" }, { status: "claimed" }] });
     if (!allPets) throwError("No pet found", 404)
     res.status(200).json({ success: true, message: "Successfully Fetched all Lost and Found Pets", data: allPets })
   } catch (error) {
