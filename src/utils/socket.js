@@ -23,8 +23,8 @@ const initializeSocket = (server) => {
             // console.log(userId, targetUserId);
             socket.join(room);
         })
-        socket.on("sendMessage", async ({ userId, targetUserId, message }) => {
-            if (!userId || !targetUserId || !message) return;
+        socket.on("sendMessage", async ({firstName, userId, targetUserId, message }) => {
+            if (!firstName || !userId || !targetUserId || !message) return;
             const room = encrytedRoomId(userId, targetUserId);
             try {
                 const chat = await Chat.findOne({
@@ -50,7 +50,7 @@ const initializeSocket = (server) => {
                 io.to(room).emit("MessageReceived", {
                     senderId: userId,
                     message,
-                    senderName: "",
+                    senderName: firstName,
                     createdAt: new Date()
                 });
             } catch (error) {
