@@ -11,6 +11,7 @@ const groomingRoute=require("./grooming_route")
 const storesRoute=require("./stores_route")
 const ordersRoute=require("./orders_route")
 const adminRoute=require("./admin_route")
+const chatRoute=require("./chat_route")
 
 //Public
 router.use("/auth",authRoute)
@@ -23,6 +24,7 @@ router.use("/user",authenticateUser,userRoute)
 router.use("/shelter",authenticateUser,shelterRoute)
 router.use("/orders",authenticateUser,ordersRoute)
 router.use("/admin",authenticateUser,authenticateAdmin,adminRoute)
+router.use("/chat",authenticateUser,chatRoute)
 
 
 
