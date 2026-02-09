@@ -26,4 +26,7 @@ const handleChat = async (req, res) => {
         res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
     }
 }
-module.exports = { handleChat }
+const handleChatList=async (params) => {
+    
+}
+module.exports = { handleChat,handleChatList}
