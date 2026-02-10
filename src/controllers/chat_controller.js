@@ -26,7 +26,27 @@ const handleChat = async (req, res) => {
         res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
     }
 }
-const handleChatList=async (params) => {
-    
+const handleChatList = async (req, res) => {
+    try {
+        const userId = req.userId;
+        let chats = await Chat.find({ participants: { $in: [userId] } }).populate("participants", "firstName").sort({ updatedAt: -1 });
+        const chatList = chats.map((chat) => {
+            const otherUser = chat.participants.find((p) => p._id.toString() !== userId)
+            const letestMessage= chat.messages[chat.messages.length - 1]
+            return {
+                chatId:chat._id,
+                userId: otherUser._id,
+                name:otherUser.firstName,
+                letestMessage:letestMessage?.text || "",
+                letestMessageTime:letestMessage?.createdAt || chat.updatedAt,
+            }
+        })
+        res.status(200).json({ success: true, message: "ChatList retrieved successfully", data: chatList });
+    } catch (error) {
+        const statusCode = error.statusCode || 500;
+        res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    }
+
+
 }
-module.exports = { handleChat,handleChatList}
+module.exports = { handleChat, handleChatList }
