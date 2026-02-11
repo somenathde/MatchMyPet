@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { type } = require("node:os");
 
 const groomingServiceSchema = new mongoose.Schema(
   {
@@ -30,7 +31,7 @@ const groomingServiceSchema = new mongoose.Schema(
       },
       currency: {
         type: String,
-        enum:["INR","USD"],
+        enum: ["INR", "USD"],
         default: "INR",
         uppercase: true,
         trim: true,
@@ -57,6 +58,7 @@ const groomingServiceSchema = new mongoose.Schema(
         type: Number,
         default: 0,
       },
+      users: [{ type: mongoose.Schema.Types.ObjectId, ref: "user" }]
     },
 
     isActive: {
@@ -71,5 +73,5 @@ const groomingServiceSchema = new mongoose.Schema(
   }
 );
 
- const GroomingService= mongoose.model("groomingService", groomingServiceSchema);
-module.exports=GroomingService;
+const GroomingService = mongoose.model("groomingService", groomingServiceSchema);
+module.exports = GroomingService;

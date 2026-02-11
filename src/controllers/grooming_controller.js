@@ -5,7 +5,7 @@ const validator = require("validator")
 const throwError = require("../utils/throwError")
 
 
-const handleAddGroomingService = async (req, res) => {
+const handleAddGroomingService = async (req, res, next) => {
   try {
     validationGroomingServiceRegisterData(req);
     const groomingService = new GroomingService({
@@ -15,75 +15,83 @@ const handleAddGroomingService = async (req, res) => {
     await groomingService.save()
     res.status(200).json({ success: true, message: "Service Created Successfully", data: groomingService });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error);
   }
 };
 
-const handleModifyGroomingService = async (req, res) => {
+const handleModifyGroomingService = async (req, res, next) => {
   try {
     validationGroomingServiceUpdateData(req)
-    const result = await GroomingService.findByIdAndUpdate(req.params.serviceId, req.body)//todo)
+    const result = await GroomingService.findByIdAndUpdate(req.params.serviceId, req.body, { new: true, runValidators: true })//todo)
     if (!result) throwError("Service not found / Not updated", 400)
     res.status(200).json({ success: true, message: "Modified Successsfully", data: result });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error);
   }
 };
 
-const handleGetOneGroomingService = async (req, res) => {
+const handleGetOneGroomingService = async (req, res, next) => {
   try {
-    if (!validator.isMongoId(req.params.serviceId)) throw new Error("Not valid service id")
+    if (!validator.isMongoId(req.params.serviceId)) throwError("Not valid service id", 400)
     const result = await GroomingService.findById(req.params.serviceId)
     res.status(200).json({ success: true, message: "Successfuly Fetched", data: result });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error);
   }
 };
 
-const handleRateGroomingService = async (req, res) => {
-  try {//todo
-    if (!validator.isMongoId(req.params.serviceId)) throw new Error("Not valid service id")
-    const groomingService = await GroomingService.findById(req.params.serviceId)
-    if (!groomingService) throwError("Service not found", 404);
+const handleRateGroomingService = async (req, res, next) => {
+  try {
+    if (!validator.isMongoId(req.params.serviceId)) throwError("Not valid service id", 400)
 
-    const { average, count } = groomingService.ratings;
     const { rating } = req.body;
-    if (rating === undefined || typeof rating !== "number") throw new Error("Rating must be a number")
+    if (rating === undefined || typeof rating !== "number") throwError("Rating must be a number", 400)
     if (rating < 1 || rating > 5) throwError("Rating should between 1 to 5", 400)
-    const newAvg = (average * count + req.body.rating) / (count + 1);
-    groomingService.ratings.average = Number(newAvg);
-    groomingService.ratings.count = count + 1;
-    await groomingService.save()
-    res.status(200).json({ success: true, message: "Rating", data: groomingService.ratings });
+
+    const updatedRating = await GroomingService.findOneAndUpdate({ _id: req.params.serviceId, "ratings.users": { $ne: req.userId } }, [
+      {
+        $set: {
+          "ratings.average": {
+            $divide: [
+              {
+                $add: [{ $multiply: ["$ratings.average", "$ratings.count"] }, rating]
+
+              }, { $add: ["$ratings.count", 1] }]
+          },
+          "ratings.count": { $add: ["$ratings.count", 1] },
+          "ratings.users": {
+            $concatArrays: ["$ratings.users", [req.userId]],
+          }
+        }
+      }
+    ],
+      { new: true })
+
+
+    if (!updatedRating) throwError("you already rated this service", 400)
+    res.status(200).json({ success: true, message: "Rating", data: updatedRating.ratings });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error);
   }
 };
 
-const handleDeleteOneGroomingService = async (req, res) => {
+const handleDeleteOneGroomingService = async (req, res, next) => {
   try {
     if (!validator.isMongoId(req.params.serviceId)) throwError("Not valid service id", 400)
     const result = await GroomingService.findByIdAndDelete(req.params.serviceId)
     if (!result) throwError("Not Deleted", 404)
     res.status(200).json({ success: true, message: "Deleted Successfully", data: result._id });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error);
   }
 };
 
-const handleGetAllGroomingServices = async (req, res) => {
+const handleGetAllGroomingServices = async (req, res, next) => {
   try {
     const result = await GroomingService.find({})
-    if (!result) throwError("Not Found", 404)
     res.status(200).json({ success: true, message: "All Services Fetched Successfully", data: result });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error);
   }
 };
 
@@ -91,20 +99,26 @@ const handleGetAllGroomingServices = async (req, res) => {
 
 
 
-const handleDeleteOneGroomingServiceProvider = async (req, res) => {
+const handleDeleteOneGroomingServiceProvider = async (req, res, next) => {
+  const session = await mongoose.startSession();
   try {
-    const result = await GroomingProvider.findByIdAndDelete(req.params.id)
-    if (!result) throwError("Not deleted", 404)
-    const deleteServices = await GroomingService.deleteMany({ providerId: result._id })
-    res.status(200).json({ message: "Provider Deleted, Services Deleted Successfully", data: { ProviderDeleted: result, serviceDeleted: deleteServices.deletedCount } });
+    session.startTransaction();
+    const provider = await GroomingProvider.findById(req.params.id).session(session);
+    if (!provider) throwError("Not deleted", 404);
+    await GroomingProvider.deleteOne({ _id: provider._id }, { session })
+    const deleteServices = await GroomingService.deleteMany({ providerId: provider._id }, { session })
+    await session.commitTransaction()
+    session.endSession();
+    res.status(200).json({ message: "Provider Deleted, Services Deleted Successfully", data: { ProviderDeleted: provider, serviceDeleted: deleteServices.deletedCount } });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    await session.abortTransaction()
+    session.endSession()
+    next(error);
   }
 };
 
 
-const handleAddGroomingServiceProvider = async (req, res) => {
+const handleAddGroomingServiceProvider = async (req, res, next) => {
   try {
     validationGroomingServiceProviderSignupData(req);
     const groomingProvider = new GroomingProvider({
@@ -117,38 +131,35 @@ const handleAddGroomingServiceProvider = async (req, res) => {
 
     res.status(201).json({ success: true, message: "Groomming Service provider registered successfully", data: groomingProvider });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error);
   }
 };
 
 
 
 
-const handleGetOneGroomingServiceProvider = async (req, res) => {
+const handleGetOneGroomingServiceProvider = async (req, res, next) => {
   try {
     const groomingProvider = await GroomingProvider.findById(req.params.id)
     if (!groomingProvider) throwError("Not Found", 404)
     res.status(200).json({ success: true, message: "Provider Fetched Successfully", data: groomingProvider });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error);
   }
 };
-const handleGetAllGroomingServicesProvider = async (req, res) => {
+const handleGetAllGroomingServicesProvider = async (req, res, next) => {
   try {
     const groomingProviders = await GroomingProvider.find({})
-    if (!groomingProviders) throwError("Not Found", 404)
     res.status(200).json({ success: true, message: "All Provider Fetched Successfully", data: groomingProviders });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error);
   }
 };
-const handleModifyGroomingServiceProvider = async (req, res) => {
+const handleModifyGroomingServiceProvider = async (req, res, next) => {
   try {
     validationGroomingServiceProviderUpdateData(req);
     const groomingStore = await GroomingProvider.findById(req.params.id)
+    if (!groomingStore) throwError("Not Found", 400)
     Object.keys(req.body).forEach(key => {
       groomingStore[key] = req.body[key]
     });
@@ -156,30 +167,27 @@ const handleModifyGroomingServiceProvider = async (req, res) => {
     await groomingStore.save()
     res.status(200).json({ success: true, message: "Update Successful", data: groomingStore });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error);
   }
 };
-const handleAddAdminGroomingServicesProvider = async (req, res) => {
+const handleAddAdminGroomingServicesProvider = async (req, res, next) => {
   try {
 
     const groomingProvider = await GroomingProvider.findByIdAndUpdate(req.params.id, { $addToSet: { admins: req.body.admin } }, { runValidator: true, returnDocument: "after" })
     if (!groomingProvider) throwError("update unsuccessful", 404)
     res.status(200).json({ success: true, message: "Update Successful", data: groomingProvider });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error);
   }
 };
-const handleRemoveAdminGroomingServicesProvider = async (req, res) => {
+const handleRemoveAdminGroomingServicesProvider = async (req, res, next) => {
   try {
 
     const groomingProvider = await GroomingProvider.findByIdAndUpdate(req.params.id, { $pull: { admins: req.body.admin } }, { runValidator: true, returnDocument: "after" })
     if (!groomingProvider) throwError("update unsuccessful", 404)
     res.status(200).json({ success: true, message: "Update Successful", data: groomingProvider });
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error);
   }
 };
 

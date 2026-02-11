@@ -20,8 +20,7 @@ async function authorisedUsertoModifyPetDetails(req, res, next) {
     }
     next();
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error)
   }
 }
 
@@ -34,8 +33,7 @@ async function authorisedUserToEditLostFoundPetDetail(req, res, next) {
     if (!lostAndFoundPet.userId.equals(req.userId)) throwError("Not authorised", 403)
     next()
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error)
   }
 
 }
@@ -44,15 +42,16 @@ async function authorisedUserToEditLostFoundPetDetail(req, res, next) {
 async function authorizeGroomingProviderAdmin(req, res, next) {
   try {
     if (!req.groomingProviderId) {
+      if (!validator.isMongoId(req.params.id)) throwError("Not valid Id", 400)
       const groomingProvider = await GroomingProvider.findById(req.params.id)
+      if (!GroomingProvider) throwError("Provider Not Found")
       const isAdmin = groomingProvider.ownerId.equals(req.userId) || groomingProvider.admins.map(id => id.toString()).includes(req.userId)
       if (!isAdmin) throwError("User Not a Service providerAdmin", 403)
       req.groomingProviderId = groomingProvider._id
     }
     next()
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error)
   }
 }
 
@@ -70,8 +69,7 @@ async function authorisedStoreAdmin(req, res, next) {
     next()
 
   } catch (error) {
-    const statusCode = error.statusCode || 500;
-    res.status(statusCode).json({ success: false, message: statusCode >= 500 ? "Internal server error" : error.message });
+    next(error)
   }
 }
 
