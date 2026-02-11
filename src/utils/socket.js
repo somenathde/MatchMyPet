@@ -2,7 +2,8 @@ const socket = require("socket.io")
 const crypto = require("crypto");
 const Chat = require("../models/chat");
 const cookie = require("cookie")
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+const { error } = require("console");
 
 const initializeSocket = (server) => {
     /*const encrytedRoomId = (userId, targetUserId) => {
@@ -55,9 +56,10 @@ const initializeSocket = (server) => {
         socket.on("sendMessage", async ({ firstName, targetUserId, message }) => {
             if (!firstName || !targetUserId || !message) return;
             const encryptedTargetUserId = hashId(targetUserId);
+            if(targetUserId===userId) return
             try {
                 const chat = await Chat.findOne({
-                    participants: { $all: [userId, targetUserId] }
+                    participants: { $all: [userId, targetUserId], $size:2 }
                 });
                 if (chat) {
                     chat.messages.push({

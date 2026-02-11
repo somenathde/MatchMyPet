@@ -7,8 +7,9 @@ const handleChat = async (req, res) => {
     try {
         const { targetUserId } = req.params;
         const userId = req.userId;
+        //console.log(userId,targetUserId)
         if (!targetUserId) { throwError("Missing required fields", 400) }
-        if (targetUserId === userId) { throwError("Cannot chat with yourself", 400) }
+        if (targetUserId.toString() === userId.toString()) { throwError("Cannot chat with yourself", 400) }
         if (!validator.isMongoId(targetUserId)) throwError("Not valid user id", 400)
         let chat = await Chat.findOne({
             participants: { $all: [userId, targetUserId] }
@@ -32,13 +33,13 @@ const handleChatList = async (req, res) => {
         let chats = await Chat.find({ participants: { $in: [userId] } }).populate("participants", "firstName").sort({ updatedAt: -1 });
         const chatList = chats.map((chat) => {
             const otherUser = chat.participants.find((p) => p._id.toString() !== userId)
-            const letestMessage= chat.messages[chat.messages.length - 1]
+            const letestMessage = chat.messages[chat.messages.length - 1]
             return {
-                chatId:chat._id,
+                chatId: chat._id,
                 userId: otherUser._id,
-                name:otherUser.firstName,
-                letestMessage:letestMessage?.text || "",
-                letestMessageTime:letestMessage?.createdAt || chat.updatedAt,
+                name: otherUser.firstName,
+                letestMessage: letestMessage?.text || "",
+                letestMessageTime: letestMessage?.createdAt || chat.updatedAt,
             }
         })
         res.status(200).json({ success: true, message: "ChatList retrieved successfully", data: chatList });
